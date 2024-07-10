@@ -1,7 +1,7 @@
 host := `uname -a`
 
 # run the program
-r +ARG:
+r *ARG:
   cargo run -- {{ARG}}
 
 # expand rust code
