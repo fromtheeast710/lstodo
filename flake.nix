@@ -20,6 +20,7 @@
         rust-analyzer-unwrapped
         cargo-expand
         rust-bin.nightly."2024-04-07".rustfmt
+        nixd
       ];
       RUST_SRC_PATH = "${toolchain}/lib/rustlib/src/rust/library";
     };
