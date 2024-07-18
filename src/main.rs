@@ -213,7 +213,7 @@ impl LsTodo {
     }
 
     match args[0].as_str() {
-      "h" => done_help(),
+      "h" => note_help(),
       _ => eprintln!("Invalid note! Use h to see help!"),
     }
 
@@ -252,7 +252,7 @@ impl LsTodo {
 }
 
 #[rustfmt::skip]
-fn done_help() {
+fn note_help() {
   print!(
 "lstodo note [d/i/e/u/h] [INDEX] highlight important task
 Notes:
