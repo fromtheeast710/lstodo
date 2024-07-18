@@ -24,7 +24,8 @@ const STDOUT_ERR: &str = "Failed to write to stdout!";
 
 pub struct LsTodo {
   lstodo: Vec<String>,
-  lstodo_path: String
+  lstodo_path: String,
+  lstodo_count: usize,
 }
 
 impl LsTodo {
@@ -48,10 +49,12 @@ impl LsTodo {
     buf_read.read_to_string(&mut content).unwrap();
 
     let lstodo = content.lines().map(str::to_string).collect();
+    let lstodo_count = content.lines().count();
 
     Ok(Self {
       lstodo,
       lstodo_path,
+      lstodo_count,
     })
   }
 
@@ -217,8 +220,30 @@ impl LsTodo {
     todo!()
   }
 
-  pub fn change() {
-    todo!()
+  pub fn change(&self, args: &[String]) {
+    if args.len() != 2 {
+      eprintln!("change takes 2 arguements!");
+      process::exit(1)
+    }
+
+    if &args[0].parse::<usize>().unwrap() > &self.lstodo_count {
+      eprintln!("There are only {} todos!", &self.lstodo_count.yellow());
+      process::exit(1)
+    }
+
+    let file = OpenOptions::new().write(true).open(&self.lstodo_path).expect(&OPEN_ERR);
+
+    let mut buffer = BufWriter::new(file);
+
+    for (p, l) in self.lstodo.iter().enumerate() {
+      if &p == &args[0].parse::<usize>().unwrap() {
+        let l = format!("{}{}\n", &l[..4], args[1]);
+        buffer.write_all(l.as_bytes()).expect(&WRITE_ERR);
+      } else {
+        let l = format!("{l}\n");
+        buffer.write_all(l.as_bytes()).expect(&WRITE_ERR);
+      }
+    }
   }
 
   pub fn mover() {
@@ -261,6 +286,7 @@ fn main() {
       "undo" | "u" => lstodo.undo(&args[2..]),
       "list" | "l" => lstodo.list(),
       "sort" | "s" => lstodo.sort(),
+      "change" | "c" => lstodo.change(&args[2..]),
       "help" | "h" | "-h" | _ => help(),
     }
   } else {
