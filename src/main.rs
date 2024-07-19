@@ -112,7 +112,7 @@ impl LsTodo {
 
       let line = format!("[ ] {a}\n");
 
-      buffer.write_all(line.as_bytes()).expect(&WRITE_ERR);
+      buffer.write_all(line.as_bytes()).expect(&WRITE_ERR)
     }
   }
 
@@ -132,16 +132,16 @@ impl LsTodo {
           if &l[..4] == "[d] " {
             let l = format!("[ ] {}\n", &l[4..]);
 
-            buffer.write_all(l.as_bytes()).expect(&WRITE_ERR);
+            buffer.write_all(l.as_bytes()).expect(&WRITE_ERR)
           } else {
             let l = format!("[d] {}\n", &l[4..]);
 
-            buffer.write_all(l.as_bytes()).expect(&WRITE_ERR);
+            buffer.write_all(l.as_bytes()).expect(&WRITE_ERR)
           }
         } else if &l[..4] == "[ ] " || &l[..4] == "[d] " {
           let l = format!("{l}\n");
 
-          buffer.write_all(l.as_bytes()).expect(&WRITE_ERR);
+          buffer.write_all(l.as_bytes()).expect(&WRITE_ERR)
         }
       }
     }
@@ -175,7 +175,7 @@ impl LsTodo {
 
       let l = format!("{l}\n");
 
-      buffer.write_all(l.as_bytes()).expect(&WRITE_ERR);
+      buffer.write_all(l.as_bytes()).expect(&WRITE_ERR)
     }
   }
 
@@ -300,6 +300,6 @@ fn main() {
       "help" | "h" | "-h" | _ => help(),
     }
   } else {
-    lstodo.list();
+    lstodo.list()
   }
 }
