@@ -69,7 +69,7 @@ impl LsTodo {
     macro_rules! listfmt {
       ($pos: expr, $line: expr) => {
         format!("{:>width$} {}\n", $pos.bold(), $line, width = &self.lstodo_indent)
-      };
+      }
     }
 
     for (p, l) in self.lstodo.iter().enumerate() {
