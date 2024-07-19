@@ -26,6 +26,7 @@ pub struct LsTodo {
   lstodo: Vec<String>,
   lstodo_path: String,
   lstodo_count: usize,
+  lstodo_indent: usize,
 }
 
 impl LsTodo {
@@ -50,11 +51,13 @@ impl LsTodo {
 
     let lstodo = content.lines().map(str::to_string).collect();
     let lstodo_count = content.lines().count();
+    let lstodo_indent = lstodo_count.to_string().len();
 
     Ok(Self {
       lstodo,
       lstodo_path,
       lstodo_count,
+      lstodo_indent,
     })
   }
 
@@ -62,18 +65,25 @@ impl LsTodo {
     let stdout = io::stdout();
     let mut writer = BufWriter::new(stdout);
 
-    for (n, t) in self.lstodo.iter().enumerate() {
-      if t.len() > 4 {
-        let n = (n + 1).to_string();
-        let s = &t[..4];
-        let t = &t[4..];
+    #[rustfmt::skip]
+    macro_rules! listfmt {
+      ($pos: expr, $line: expr) => {
+        format!("{:>width$} {}\n", $pos.bold(), $line, width = &self.lstodo_indent)
+      };
+    }
+
+    for (p, l) in self.lstodo.iter().enumerate() {
+      if l.len() > 4 {
+        let p = (p + 1).to_string();
+        let s = &l[..4];
+        let l = &l[4..];
 
         let data = match s {
-          "[d] " => format!("{:>2} {}\n", n.bold(), t.dimmed().strikethrough()),
-          "[i] " => format!("{:>2} {}\n", n.bold(), t.yellow()),
-          "[e] " => format!("{:>2} {}\n", n.bold(), t.red()),
-          "[ ] " => format!("{:>2} {}\n", n.bold(), t),
-          _ => format!("{:>2} {}\n", n.bold(), "Not a valid todo!".red()),
+          "[d] " => listfmt!(p, l.dimmed().strikethrough()),
+          "[i] " => listfmt!(p, l.yellow()),
+          "[e] " => listfmt!(p, l.red()),
+          "[ ] " => listfmt!(p, l),
+          _ => listfmt!(p, "Not a valid todo!".red()),
         };
 
         writer.write_all(data.as_bytes()).expect(&STDOUT_ERR)
