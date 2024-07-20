@@ -63,6 +63,7 @@ impl LsTodo {
 
   pub fn list(&self) {
     let stdout = io::stdout();
+
     let mut writer = BufWriter::new(stdout);
 
     #[rustfmt::skip]
@@ -160,11 +161,7 @@ impl LsTodo {
       process::exit(1)
     }
 
-    let file = OpenOptions::new()
-      .write(true)
-      .truncate(true)
-      .open(&self.lstodo_path)
-      .expect(&OPEN_ERR);
+    let file = OpenOptions::new().write(true).open(&self.lstodo_path).expect(&OPEN_ERR);
 
     let mut buffer = BufWriter::new(file);
 
@@ -191,15 +188,19 @@ impl LsTodo {
       if l.len() > 5 {
         if &l[..4] == "[ ] " {
           let l = format!("{l}\n");
+
           todo.push_str(&l)
         } else if &l[..4] == "[d] " {
           let l = format!("{l}\n");
+
           done.push_str(&l)
         } else if &l[..4] == "[i] " {
           let l = format!("{l}\n");
+
           impo.push_str(&l)
         } else if &l[..4] == "[e] " {
           let l = format!("{l}\n");
+
           emer.push_str(&l)
         }
       }
@@ -236,7 +237,7 @@ impl LsTodo {
       process::exit(1)
     }
 
-    if &args[0].parse::<usize>().unwrap() > &self.lstodo_count {
+    if &args[0] > &self.lstodo_count.to_string() {
       eprintln!("There are only {} todos!", &self.lstodo_count.yellow());
       process::exit(1)
     }
@@ -246,11 +247,13 @@ impl LsTodo {
     let mut buffer = BufWriter::new(file);
 
     for (p, l) in self.lstodo.iter().enumerate() {
-      if &p == &args[0].parse::<usize>().unwrap() {
+      if &p.to_string() == &args[0] {
         let l = format!("{}{}\n", &l[..4], args[1]);
+
         buffer.write_all(l.as_bytes()).expect(&WRITE_ERR);
       } else {
         let l = format!("{l}\n");
+
         buffer.write_all(l.as_bytes()).expect(&WRITE_ERR);
       }
     }
@@ -319,11 +322,11 @@ fn main() {
       "add" | "a" => lstodo.add(&args[2..]),
       "note" | "n" => lstodo.note(&args[2..]),
       "done" | "d" => lstodo.done(&args[2..]),
-      "move" | "m" => lstodo.mover(&args[2..]),
       "undo" | "u" => lstodo.undo(&args[2..]),
+      "move" | "m" => lstodo.mover(&args[2..]),
+      "change" | "c" => lstodo.change(&args[2..]),
       "list" | "l" => lstodo.list(),
       "sort" | "s" => lstodo.sort(),
-      "change" | "c" => lstodo.change(&args[2..]),
       "help" | "h" | "-h" | _ => help(),
     }
   } else {
