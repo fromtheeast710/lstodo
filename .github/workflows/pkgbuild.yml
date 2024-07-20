@@ -1,16 +1,17 @@
 name: LsTodo
 
-
 on:
   push:
     branches: [ "main" ]
 
 jobs:
-  build:
+  aur-publish:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4
-    - uses: KSXGitHub/github-actions-deploy-aur@v2.7.2
-    - name: Build
-      with:
-        pkgbuild: ./PKGBUILD
+      - uses: actions/checkout@v2
+
+      - name: Publish AUR package
+        uses: KSXGitHub/github-actions-deploy-aur@<TAG>
+        with:
+          pkgname: lstodo
+          pkgbuild: ./PKGBUILD
