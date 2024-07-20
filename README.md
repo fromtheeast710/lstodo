@@ -1,12 +1,24 @@
 # LsTodo
 
-A small and simple cli todo manager, inspired by [sioodmy](https://github.com/sioodmy/todo).
-
-## Note
-
-LsTodo is still under development, some features are not yet implemented but should be underway.
+A small and simple CLI todo manager, inspired by [sioodmy's todo](https://github.com/sioodmy/todo).
 
 ## Installation
+
+```sh
+# clone and move into the repo
+git clone https://github.com/fromtheeast710/lstodo
+cd lstodo
+```
+
+From there you can either use:
+
++ `makepkg -fsic` for Arch Linux users.
++ If you want to install via Cargo:
+  ```sh
+  cargo build --release --all-features
+  cp target/release/lstodo /usr/bin
+  ```
++ `nix build` is underway.
 
 ## Help
 
