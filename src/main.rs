@@ -218,17 +218,41 @@ impl LsTodo {
   }
 
   pub fn note(&self, args: &[String]) {
-    if args.len() != 2 && args[0] != "h" {
-      eprintln!("note takes 2 arguments!");
+    if args.len() < 2 && args[0] != "h" {
+      eprintln!("note takes at least 2 arguments!");
       process::exit(1)
     }
 
-    match args[0].as_str() {
-      "h" => note_help(),
-      _ => eprintln!("Invalid note! Use h to see help!"),
+    if args[0] == "h" {
+      note_help()
     }
 
-    todo!()
+    let file = OpenOptions::new().write(true).open(&self.lstodo_path).expect(&OPEN_ERR);
+
+    let mut buffer = BufWriter::new(file);
+
+    for (p, l) in self.lstodo.iter().enumerate() {
+      if l.len() > 5 {
+        if args.contains(&(p + 1).to_string()) {
+          let l = match args[0].as_str() {
+            "d" => format!("[d] {}\n", &l[4..]),
+            "i" => format!("[i] {}\n", &l[4..]),
+            "e" => format!("[e] {}\n", &l[4..]),
+            "u" => format!("[ ] {}\n", &l[4..]),
+            _ => {
+              eprintln!("Invalid note! Use h to see help!");
+              process::exit(1)
+            }
+          };
+
+          buffer.write_all(l.as_bytes()).expect(&WRITE_ERR)
+        } else {
+          let l = format!("{l}\n");
+
+          buffer.write_all(l.as_bytes()).expect(&WRITE_ERR)
+        }
+      }
+    }
   }
 
   pub fn change(&self, args: &[String]) {
@@ -292,14 +316,14 @@ impl LsTodo {
 
 #[rustfmt::skip]
 fn note_help() {
-  print!(
+  println!(
 "lstodo note [d/i/e/u/h] [INDEX] highlight important task
 Notes:
   h print this help
   d mark the task as {}
   i mark the task as {}
   e mark the task as {}
-  u mark the task as undone\n",
+  u mark the task as undone",
     "done".dimmed().strikethrough(),
     "important".yellow(),
     "emergency".red()
