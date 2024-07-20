@@ -1,5 +1,6 @@
 name: LsTodo
 
+
 on:
   push:
     branches: [ "main" ]
@@ -9,5 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
+    - uses: KSXGitHub/github-actions-deploy-aur@v2.7.2
     - name: Build
-      run:  makepkg -fsic
+      with:
+        pkgbuild: ./PKGBUILD
