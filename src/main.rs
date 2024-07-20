@@ -256,8 +256,34 @@ impl LsTodo {
     }
   }
 
-  pub fn mover() {
-    todo!()
+  pub fn mover(&self, args: &[String]) {
+    if args.len() != 2 {
+      eprintln!("move takes 2 arguements!");
+      process::exit(1)
+    }
+
+    if args.iter().any(|i| i > &self.lstodo_count.to_string()) {
+      eprintln!("There are only {} todos!", &self.lstodo_count.yellow());
+      process::exit(1)
+    }
+
+    let file = OpenOptions::new().write(true).open(&self.lstodo_path).expect(&OPEN_ERR);
+    let index: Vec<usize> = args.iter().map(|arg| arg.parse::<usize>().unwrap()).collect();
+
+    let todo_st = self.lstodo[index[0] - 1].clone();
+    let todo_nd = self.lstodo[index[1] - 1].clone();
+
+    let mut buffer = BufWriter::new(file);
+
+    for (p, l) in self.lstodo.iter().enumerate() {
+      let l = match p + 1 {
+        i if i == index[0] => format!("{todo_nd}\n"),
+        i if i == index[1] => format!("{todo_st}\n"),
+        _ => format!("{l}\n"),
+      };
+
+      buffer.write_all(l.as_bytes()).expect(&WRITE_ERR);
+    }
   }
 }
 
@@ -293,6 +319,7 @@ fn main() {
       "add" | "a" => lstodo.add(&args[2..]),
       "note" | "n" => lstodo.note(&args[2..]),
       "done" | "d" => lstodo.done(&args[2..]),
+      "move" | "m" => lstodo.mover(&args[2..]),
       "undo" | "u" => lstodo.undo(&args[2..]),
       "list" | "l" => lstodo.list(),
       "sort" | "s" => lstodo.sort(),
