@@ -9,8 +9,11 @@ e:
   cargo expand --bin lstodo | bat -l rs
 
 # build release binary
-b:
+bc:
   cargo build --frozen --release --all-features
+
+bn:
+  nix build |& nom
 
 # remove the target dir
 c:
