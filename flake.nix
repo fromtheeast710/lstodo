@@ -8,14 +8,28 @@
 
   outputs = { self, nixpkgs, rust-overlay }: let
     system = "x86_64-linux";
+
     pkgs = import nixpkgs {
       inherit system;
       overlays = [ rust-overlay.overlays.default ];
     };
+
     toolchain = pkgs.rust-bin.fromRustupToolchainFile ./Toolchain.toml;
+
+    builder = { lib, rustPlatform }: let
+      toml = (lib.importTOML ./Cargo.toml).package;
+    in rustPlatform.buildRustPackage {
+      inherit (toml) version;
+
+      pname = toml.name;
+      src = ./.;
+      cargoLock.lockFile = ./Cargo.lock;
+
+      meta.mainProgram = "lstodo";
+    };
   in with pkgs; {
     packages.${system} = {
-      lstodo = pkgs.callPackage ./package.nix { };
+      lstodo = pkgs.callPackage builder { };
       default = self.packages.${system}.lstodo;
     };
 
