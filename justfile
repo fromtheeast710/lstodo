@@ -8,16 +8,29 @@ r *ARG:
 e:
   cargo expand --bin lstodo | bat -l rs
 
-# build release binary
-bc:
+# cargo build release binary
+cb:
   cargo build --frozen --release --all-features
 
-bn:
+# remove the target dir
+cc:
+  cargo clean
+
+# nix build release derivative
+nb:
   nix build |& nom
 
-# remove the target dir
-c:
-  cargo clean
+# nix update flake.lock
+nu:
+  nix flake update
+
+# nix check flake
+nc:
+  nix flake check
+
+# nix show flake's info
+ns:
+  nix flake show
 
 # reload environment
 d:
