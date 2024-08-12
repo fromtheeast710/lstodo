@@ -14,13 +14,17 @@
     };
     toolchain = pkgs.rust-bin.fromRustupToolchainFile ./Toolchain.toml;
   in with pkgs; {
+    packages.${system} = {
+      lstodo = pkgs.callPackage ./package.nix { };
+      default = self.packages.${system}.lstodo;
+    };
+
     devShells.${system}.default = mkShell {
       packages = [
         toolchain
         rust-analyzer-unwrapped
         cargo-expand
         rust-bin.nightly."2024-04-07".rustfmt
-        nixd
       ];
       RUST_SRC_PATH = "${toolchain}/lib/rustlib/src/rust/library";
     };
