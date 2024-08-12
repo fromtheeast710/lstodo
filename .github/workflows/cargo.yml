@@ -1,4 +1,4 @@
-name: LsTodo
+name: Cargo Build LsTodo
 
 on:
   push:
