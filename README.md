@@ -2,6 +2,12 @@
 
 A small and simple CLI todo manager, inspired by [sioodmy's todo](https://github.com/sioodmy/todo).
 
+## New Features
+
++ Rewrite.
++ Move.
++ Color tag important todos.
+
 ## Installation
 
 ```sh
@@ -18,7 +24,12 @@ From there you can either use:
   cargo build --release --all-features
   cp target/release/lstodo /usr/bin
   ```
-+ `nix build` is underway.
++ For installation with nix:
+  ```sh
+  nix profile install .#lstodo
+  # or
+  nix profile install fromtheeast710#watchers
+  ```
 
 ## Help
 
