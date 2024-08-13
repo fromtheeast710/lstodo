@@ -14,7 +14,7 @@
       overlays = [ rust-overlay.overlays.default ];
     };
 
-    toolchain = pkgs.rust-bin.fromRustupToolchainFile ./Toolchain.toml;
+    rust = pkgs.rust-bin.fromRustupToolchainFile ./Toolchain.toml;
 
     builder = { lib, rustPlatform }: let
       toml = (lib.importTOML ./Cargo.toml).package;
@@ -35,12 +35,12 @@
 
     devShells.${system}.default = mkShell {
       packages = [
-        toolchain
+        rust
         rust-analyzer-unwrapped
         cargo-expand
         rust-bin.nightly."2024-04-07".rustfmt
       ];
-      RUST_SRC_PATH = "${toolchain}/lib/rustlib/src/rust/library";
+      RUST_SRC_PATH = "${rust}/lib/rustlib/src/rust/library";
     };
   };
 }
