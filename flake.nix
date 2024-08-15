@@ -29,7 +29,7 @@
     };
   in with pkgs; {
     packages.${system} = {
-      lstodo = pkgs.callPackage builder { };
+      lstodo = callPackage builder { };
       default = self.packages.${system}.lstodo;
     };
 
