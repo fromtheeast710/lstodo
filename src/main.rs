@@ -271,7 +271,7 @@ impl LsTodo {
     let mut buffer = BufWriter::new(file);
 
     for (p, l) in self.lstodo.iter().enumerate() {
-      if &p.to_string() == &args[0] {
+      if &(p + 1).to_string() == &args[0] {
         let l = format!("{}{}\n", &l[..4], args[1]);
 
         buffer.write_all(l.as_bytes()).expect(&WRITE_ERR);
