@@ -4,8 +4,8 @@ A small and simple CLI todo manager, inspired by [sioodmy's todo](https://github
 
 ## New Features
 
-+ Rewrite.
-+ Move.
++ Rewrite an existing todo.
++ Move the position of 2 todos.
 + Color tag important todos.
 
 ## Installation
