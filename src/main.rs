@@ -1,7 +1,11 @@
 use colorz::*;
-use std::fs::OpenOptions;
-use std::io::{BufReader, BufWriter, Read, Write};
-use std::{env, fs, io, process};
+use std::{
+  env, fs,
+  fs::OpenOptions,
+  io,
+  io::{BufReader, BufWriter, Read, Write},
+  process,
+};
 
 const HELP: &str = "LsTodo v0.1.0
 Usage: lstodo [COMMAND] [ARGUMENTS]
@@ -266,13 +270,17 @@ impl LsTodo {
       process::exit(1)
     }
 
-    let file = OpenOptions::new().write(true).open(&self.lstodo_path).expect(&OPEN_ERR);
+    let file = OpenOptions::new()
+      .write(true)
+      .truncate(true)
+      .open(&self.lstodo_path)
+      .expect(&OPEN_ERR);
 
     let mut buffer = BufWriter::new(file);
 
     for (p, l) in self.lstodo.iter().enumerate() {
       if &(p + 1).to_string() == &args[0] {
-        let l = format!("{}{}\n", &l[..4], args[1]);
+        let l = format!("{}{}\n", &l[..4], &args[1]);
 
         buffer.write_all(l.as_bytes()).expect(&WRITE_ERR);
       } else {
