@@ -4,43 +4,46 @@
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
     rust-overlay.url = "github:oxalica/rust-overlay";
+    flake-parts.url = "github:hercules-ci/flake-parts";
   };
 
-  outputs = { self, nixpkgs, rust-overlay }: let
-    system = "x86_64-linux";
-
-    pkgs = import nixpkgs {
-      inherit system;
-      overlays = [ rust-overlay.overlays.default ];
-    };
-
-    rust = pkgs.rust-bin.fromRustupToolchainFile ./Toolchain.toml;
-
-    builder = { lib, rustPlatform }: let
-      toml = (lib.importTOML ./Cargo.toml).package;
-    in rustPlatform.buildRustPackage {
-      inherit (toml) version;
-
-      pname = toml.name;
-      src = ./.;
-      cargoLock.lockFile = ./Cargo.lock;
-
-      meta.mainProgram = "lstodo";
-    };
-  in with pkgs; {
-    packages.${system} = {
-      lstodo = callPackage builder { };
-      default = self.packages.${system}.lstodo;
-    };
-
-    devShells.${system}.default = mkShell {
-      packages = [
-        rust
-        rust-analyzer-unwrapped
-        cargo-expand
-        rust-bin.nightly."2024-04-07".rustfmt
+  outputs = inputs:
+    inputs.flake-parts.lib.mkFlake { inherit inputs; } {
+      systems = [
+        "x86_64-linux"
+        "aarch64-linux"
       ];
-      RUST_SRC_PATH = "${rust}/lib/rustlib/src/rust/library";
+
+      perSystem = { pkgs, system, ... }: let
+        rust = pkgs.rust-bin.fromRustupToolchainFile ./Toolchain.toml;
+
+        builder = { lib, rustPlatform }: let
+          toml = (lib.importTOML ./Cargo.toml).package;
+        in rustPlatform.buildRustPackage {
+          inherit (toml) version;
+
+          pname = toml.name;
+          src = ./.;
+          cargoLock.lockFile = ./Cargo.lock;
+
+          meta.mainProgram = "lstodo";
+        };
+      in with pkgs; {
+        _module.args.pkgs = import inputs.nixpkgs {
+          inherit system;
+          overlays = [ (import inputs.rust-overlay) ];
+        };
+
+        packages.default = callPackage builder { };
+
+        devShells.default = mkShell {
+          packages = [
+            rust
+            rust-analyzer-unwrapped
+            cargo-expand
+            rust-bin.nightly."2024-04-07".rustfmt
+          ];
+        };
+      };
     };
-  };
 }
