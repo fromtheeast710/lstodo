@@ -10,7 +10,7 @@ checksum = "bc2a5df6ee18d52a36920c93a7736761c6fcffa72b9d960fd9133dd8d57c5184"
 
 [[package]]
 name = "lstodo"
-version = "0.1.1"
+version = "0.1.2"
 dependencies = [
  "colorz",
 ]

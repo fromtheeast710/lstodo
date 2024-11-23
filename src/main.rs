@@ -7,7 +7,7 @@ use std::{
   process,
 };
 
-const HELP: &str = "LsTodo v0.1.1
+const HELP: &str = "LsTodo v0.1.2
 Usage: lstodo [COMMAND] [ARGUMENTS]
 Commands:
   [h]elp                      show this help message
