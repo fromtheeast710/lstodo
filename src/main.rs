@@ -14,6 +14,7 @@ Commands:
   [l]ist                      list all tasks
   [a]dd [TASK]                add new task(s)
   [d]one [INDEX]              mark task(s) as done
+  [u]ndo [INDEX]              mark task(s) as undone
   [r]emove [INDEX]            remove task(s)
   [s]ort                      sort completed and uncompleted tasks
   [n]ote [d/i/e/u/h] [INDEX]  highlight important task
@@ -118,6 +119,31 @@ impl LsTodo {
       let line = format!("[ ] {a}\n");
 
       buffer.write_all(line.as_bytes()).expect(&WRITE_ERR)
+    }
+  }
+
+  pub fn remove(&self, args: &[String]) {
+    if args.is_empty() {
+      eprintln!("remove takes at least 1 argument!");
+      process::exit(1)
+    }
+
+    let file = OpenOptions::new()
+      .write(true)
+      .truncate(true)
+      .open(&self.lstodo_path)
+      .expect(&OPEN_ERR);
+
+    let mut buffer = BufWriter::new(file);
+
+    for (p, l) in self.lstodo.iter().enumerate() {
+      if args.contains(&(p + 1).to_string()) {
+        continue;
+      }
+
+      let l = format!("{l}\n");
+
+      buffer.write_all(l.as_bytes()).expect(&WRITE_ERR)
     }
   }
 
@@ -356,6 +382,7 @@ fn main() {
       "done" | "d" => lstodo.done(&args[2..]),
       "undo" | "u" => lstodo.undo(&args[2..]),
       "move" | "m" => lstodo.mover(&args[2..]),
+      "remove" | "r" => lstodo.remove(&args[2..]),
       "change" | "c" => lstodo.change(&args[2..]),
       "list" | "l" => lstodo.list(),
       "sort" | "s" => lstodo.sort(),
