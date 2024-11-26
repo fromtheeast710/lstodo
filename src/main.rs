@@ -158,22 +158,20 @@ impl LsTodo {
     let mut buffer = BufWriter::new(file);
 
     for (p, l) in self.lstodo.iter().enumerate() {
-      if l.len() > 5 {
-        if args.contains(&(p + 1).to_string()) {
-          if &l[..4] == "[d] " {
-            let l = format!("[ ] {}\n", &l[4..]);
+      if args.contains(&(p + 1).to_string()) {
+        if &l[..4] == "[d] " {
+          let l = format!("[ ] {}\n", &l[4..]);
 
-            buffer.write_all(l.as_bytes()).expect(&WRITE_ERR)
-          } else {
-            let l = format!("[d] {}\n", &l[4..]);
-
-            buffer.write_all(l.as_bytes()).expect(&WRITE_ERR)
-          }
-        } else if &l[..4] == "[ ] " || &l[..4] == "[d] " {
-          let l = format!("{l}\n");
+          buffer.write_all(l.as_bytes()).expect(&WRITE_ERR)
+        } else {
+          let l = format!("[d] {}\n", &l[4..]);
 
           buffer.write_all(l.as_bytes()).expect(&WRITE_ERR)
         }
+      } else if &l[..4] == "[ ] " || &l[..4] == "[d] " {
+        let l = format!("{l}\n");
+
+        buffer.write_all(l.as_bytes()).expect(&WRITE_ERR)
       }
     }
   }
@@ -191,18 +189,26 @@ impl LsTodo {
       process::exit(1)
     }
 
-    let file = OpenOptions::new().write(true).open(&self.lstodo_path).expect(&OPEN_ERR);
+    let file = OpenOptions::new()
+      .write(true)
+      .truncate(true)
+      .open(&self.lstodo_path)
+      .expect(&OPEN_ERR);
 
     let mut buffer = BufWriter::new(file);
 
     for (p, l) in self.lstodo.iter().enumerate() {
       if args.contains(&(p + 1).to_string()) {
-        continue;
+        if &l[..4] != "[ ] " {
+          let l = format!("[ ] {}\n", &l[4..]);
+
+          buffer.write_all(l.as_bytes()).expect(&WRITE_ERR)
+        }
+      } else {
+        let l = format!("{l}\n");
+
+        buffer.write_all(l.as_bytes()).expect(&WRITE_ERR)
       }
-
-      let l = format!("{l}\n");
-
-      buffer.write_all(l.as_bytes()).expect(&WRITE_ERR)
     }
   }
 
@@ -215,24 +221,22 @@ impl LsTodo {
     let mut emer = String::new();
 
     for l in self.lstodo.iter() {
-      if l.len() > 5 {
-        if &l[..4] == "[ ] " {
-          let l = format!("{l}\n");
+      if &l[..4] == "[ ] " {
+        let l = format!("{l}\n");
 
-          todo.push_str(&l)
-        } else if &l[..4] == "[d] " {
-          let l = format!("{l}\n");
+        todo.push_str(&l)
+      } else if &l[..4] == "[d] " {
+        let l = format!("{l}\n");
 
-          done.push_str(&l)
-        } else if &l[..4] == "[i] " {
-          let l = format!("{l}\n");
+        done.push_str(&l)
+      } else if &l[..4] == "[i] " {
+        let l = format!("{l}\n");
 
-          impo.push_str(&l)
-        } else if &l[..4] == "[e] " {
-          let l = format!("{l}\n");
+        impo.push_str(&l)
+      } else if &l[..4] == "[e] " {
+        let l = format!("{l}\n");
 
-          emer.push_str(&l)
-        }
+        emer.push_str(&l)
       }
     }
 
@@ -262,25 +266,23 @@ impl LsTodo {
     let mut buffer = BufWriter::new(file);
 
     for (p, l) in self.lstodo.iter().enumerate() {
-      if l.len() > 5 {
-        if args.contains(&(p + 1).to_string()) {
-          let l = match args[0].as_str() {
-            "d" => format!("[d] {}\n", &l[4..]),
-            "i" => format!("[i] {}\n", &l[4..]),
-            "e" => format!("[e] {}\n", &l[4..]),
-            "u" => format!("[ ] {}\n", &l[4..]),
-            _ => {
-              eprintln!("Invalid note! Use h to see help!");
-              process::exit(1)
-            }
-          };
+      if args.contains(&(p + 1).to_string()) {
+        let l = match args[0].as_str() {
+          "d" => format!("[d] {}\n", &l[4..]),
+          "i" => format!("[i] {}\n", &l[4..]),
+          "e" => format!("[e] {}\n", &l[4..]),
+          "u" => format!("[ ] {}\n", &l[4..]),
+          _ => {
+            eprintln!("Invalid note! Use h to see help!");
+            process::exit(1)
+          }
+        };
 
-          buffer.write_all(l.as_bytes()).expect(&WRITE_ERR)
-        } else {
-          let l = format!("{l}\n");
+        buffer.write_all(l.as_bytes()).expect(&WRITE_ERR)
+      } else {
+        let l = format!("{l}\n");
 
-          buffer.write_all(l.as_bytes()).expect(&WRITE_ERR)
-        }
+        buffer.write_all(l.as_bytes()).expect(&WRITE_ERR)
       }
     }
   }

@@ -34,17 +34,18 @@ From there you can either use:
 ## Help
 
 ```
-LsTodo v0.1.0
+LsTodo v0.1.2
 Usage: lstodo [COMMAND] [ARGUMENTS]
 Commands:
   [h]elp                      show this help message
   [l]ist                      list all tasks
   [a]dd [TASK]                add new task(s)
   [d]one [INDEX]              mark task(s) as done
+  [u]ndo [INDEX]              mark task(s) as undone
   [r]emove [INDEX]            remove task(s)
   [s]ort                      sort completed and uncompleted tasks
   [n]ote [d/i/e/u/h] [INDEX]  highlight important task
   [c]hange [INDEX] [TASK]     change the content of a task
   [m]ove [INDEX] [INDEX]      switch the position of two tasks
-  reset                       remove all tasks";
+  reset                       remove all tasks
 ```

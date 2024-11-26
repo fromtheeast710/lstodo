@@ -10,7 +10,7 @@ e:
 
 # cargo build release binary
 cb:
-  cargo build --frozen --release --all-features
+  cargo clean && cargo build --frozen --release --all-features
 
 # remove the target dir
 cc:
