@@ -71,11 +71,15 @@ impl LsTodo {
 
     let mut writer = BufWriter::new(stdout);
 
-    #[rustfmt::skip]
     macro_rules! listfmt {
       ($pos: expr, $line: expr) => {
-        format!("{:>width$} {}\n", $pos.bold(), $line, width = &self.lstodo_indent)
-      }
+        format!(
+          "{:>width$} {}\n",
+          $pos.bold(),
+          $line,
+          width = &self.lstodo_indent
+        )
+      };
     }
 
     for (p, l) in self.lstodo.iter().enumerate() {
@@ -98,11 +102,6 @@ impl LsTodo {
   }
 
   pub fn add(&self, args: &[String]) {
-    if args.is_empty() {
-      eprintln!("add takes at least 1 argument!");
-      process::exit(1)
-    }
-
     let file = OpenOptions::new()
       .create(true)
       .append(true)
@@ -123,11 +122,6 @@ impl LsTodo {
   }
 
   pub fn remove(&self, args: &[String]) {
-    if args.is_empty() {
-      eprintln!("remove takes at least 1 argument!");
-      process::exit(1)
-    }
-
     let file = OpenOptions::new()
       .write(true)
       .truncate(true)
@@ -148,11 +142,6 @@ impl LsTodo {
   }
 
   pub fn done(&self, args: &[String]) {
-    if args.is_empty() {
-      eprintln!("add takes at least 1 argument!");
-      process::exit(1)
-    }
-
     let file = OpenOptions::new().write(true).open(&self.lstodo_path).expect(&OPEN_ERR);
 
     let mut buffer = BufWriter::new(file);
@@ -184,11 +173,6 @@ impl LsTodo {
   }
 
   pub fn undo(&self, args: &[String]) {
-    if args.is_empty() {
-      eprintln!("undo takes at least 1 argument!");
-      process::exit(1)
-    }
-
     let file = OpenOptions::new()
       .write(true)
       .truncate(true)
@@ -252,11 +236,6 @@ impl LsTodo {
   }
 
   pub fn note(&self, args: &[String]) {
-    if args.len() < 2 && args[0] != "h" {
-      eprintln!("note takes at least 2 arguments!");
-      process::exit(1)
-    }
-
     if args[0] == "h" {
       note_help()
     }
@@ -288,16 +267,6 @@ impl LsTodo {
   }
 
   pub fn change(&self, args: &[String]) {
-    if args.len() != 2 {
-      eprintln!("change takes 2 arguements!");
-      process::exit(1)
-    }
-
-    if &args[0] > &self.lstodo_count.to_string() {
-      eprintln!("There are only {} todos!", &self.lstodo_count.yellow());
-      process::exit(1)
-    }
-
     let file = OpenOptions::new()
       .write(true)
       .truncate(true)
@@ -320,16 +289,6 @@ impl LsTodo {
   }
 
   pub fn mover(&self, args: &[String]) {
-    if args.len() != 2 {
-      eprintln!("move takes 2 arguements!");
-      process::exit(1)
-    }
-
-    if args.iter().any(|i| i > &self.lstodo_count.to_string()) {
-      eprintln!("There are only {} todos!", &self.lstodo_count.yellow());
-      process::exit(1)
-    }
-
     let file = OpenOptions::new().write(true).open(&self.lstodo_path).expect(&OPEN_ERR);
     let index: Vec<usize> = args.iter().map(|arg| arg.parse::<usize>().unwrap()).collect();
 
@@ -346,6 +305,26 @@ impl LsTodo {
       };
 
       buffer.write_all(l.as_bytes()).expect(&WRITE_ERR);
+    }
+  }
+
+  // TODO: probably need a rewrite to be more concise
+  pub fn args<'l>(&self, args: &'l [String], cnt: usize) -> Self {
+    if args.len() != cnt {
+      eprintln!("This command needs {cnt} arguments!");
+      process::exit(1)
+    }
+
+    if args.iter().any(|i| i > &self.lstodo_count.to_string()) {
+      eprintln!("There are only {} todos!", &self.lstodo_count.yellow());
+      process::exit(1)
+    }
+
+    Self {
+      lstodo: self.lstodo.clone(),
+      lstodo_path: self.lstodo_path.clone(),
+      lstodo_count: self.lstodo_count,
+      lstodo_indent: self.lstodo_indent,
     }
   }
 }
@@ -379,13 +358,13 @@ fn main() {
 
     match &command[..] {
       "reset" => lstodo.reset(),
-      "add" | "a" => lstodo.add(&args[2..]),
-      "note" | "n" => lstodo.note(&args[2..]),
-      "done" | "d" => lstodo.done(&args[2..]),
-      "undo" | "u" => lstodo.undo(&args[2..]),
-      "move" | "m" => lstodo.mover(&args[2..]),
-      "remove" | "r" => lstodo.remove(&args[2..]),
-      "change" | "c" => lstodo.change(&args[2..]),
+      "add" | "a" => lstodo.args(&args[2..], 1).add(&args[2..]),
+      "note" | "n" => lstodo.args(&args[2..], 2).note(&args[2..]),
+      "done" | "d" => lstodo.args(&args[2..], 1).done(&args[2..]),
+      "undo" | "u" => lstodo.args(&args[2..], 1).undo(&args[2..]),
+      "move" | "m" => lstodo.args(&args[2..], 2).mover(&args[2..]),
+      "remove" | "r" => lstodo.args(&args[2..], 1).remove(&args[2..]),
+      "change" | "c" => lstodo.args(&args[2..], 2).change(&args[2..]),
       "list" | "l" => lstodo.list(),
       "sort" | "s" => lstodo.sort(),
       "help" | "h" | "-h" | _ => help(),

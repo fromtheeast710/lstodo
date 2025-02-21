@@ -41,6 +41,7 @@
             rust
             rust-analyzer-unwrapped
             cargo-expand
+            cargo-show-asm
             rust-bin.nightly."2024-04-07".rustfmt
           ];
         };
