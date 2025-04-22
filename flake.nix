@@ -1,50 +1,39 @@
 {
-  description = "LsTodo's Nix Flake";
-
-  inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
-    rust-overlay.url = "github:oxalica/rust-overlay";
-    flake-parts.url = "github:hercules-ci/flake-parts";
-  };
-
-  outputs = inputs:
-    inputs.flake-parts.lib.mkFlake { inherit inputs; } {
+  outputs = inputs: with inputs;
+    flake-parts.lib.mkFlake { inherit inputs; } {
       systems = [
         "x86_64-linux"
         "aarch64-linux"
       ];
 
       perSystem = { pkgs, system, ... }: let
-        rust = pkgs.rust-bin.fromRustupToolchainFile ./Toolchain.toml;
-
-        builder = { lib, rustPlatform }: let
-          toml = (lib.importTOML ./Cargo.toml).package;
-        in rustPlatform.buildRustPackage {
-          inherit (toml) version;
-
-          pname = toml.name;
+        workspace = nocargo.lib.${system}.mkRustPackageOrWorkspace {
+      	         # NOTE: abstraction gore ^^^^^^^^^^^^^^^^^^^^^^^^
           src = ./.;
-          cargoLock.lockFile = ./Cargo.lock;
-
-          meta.mainProgram = "lstodo";
         };
-      in with pkgs; {
-        _module.args.pkgs = import inputs.nixpkgs {
-          inherit system;
-          overlays = [ (import inputs.rust-overlay) ];
-        };
+      in {
+        packages.default = workspace.release.lstodo.bin;
 
-        packages.default = callPackage builder { };
-
-        devShells.default = mkShell {
+        devShells.default = with pkgs; mkShellNoCC {
           packages = [
-            rust
             rust-analyzer-unwrapped
-            cargo-expand
-            cargo-show-asm
-            rust-bin.nightly."2024-04-07".rustfmt
-          ];
-        };
+            rustfmt
+          ];};
       };
     };
+
+  inputs = {
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
+    rust-overlay.url = "github:oxalica/rust-overlay";
+    flake-parts.url = "github:hercules-ci/flake-parts";
+    nocargo = {
+      url = "github:oxalica/nocargo";
+      inputs.nixpkgs.follows = "nixpkgs";
+      inputs.registry-crates-io.follows = "registry-crates-io";
+    };
+    registry-crates-io = {
+      url = "github:rust-lang/crates.io-index";
+      flake = false;
+    };
+  };
 }
