@@ -18,6 +18,8 @@
           packages = [
             rust-analyzer-unwrapped
             rustfmt
+            cargo
+            rustc
           ];};
       };
     };

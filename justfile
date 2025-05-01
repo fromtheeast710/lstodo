@@ -35,3 +35,7 @@ ns:
 # reload environment
 d:
   direnv reload
+
+# start guix shell
+gs:
+  guix shell -m manifest.scm
