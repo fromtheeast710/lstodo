@@ -315,7 +315,7 @@ impl LsTodo {
       process::exit(1)
     }
 
-    if args.iter().any(|i| i > &self.lstodo_count.to_string()) {
+    if args.iter().any(|i| i.parse::<usize>().unwrap() > self.lstodo_count) {
       eprintln!("There are only {} todos!", &self.lstodo_count.yellow());
       process::exit(1)
     }
