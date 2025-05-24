@@ -66,7 +66,7 @@ impl LsTodo {
     })
   }
 
-  pub fn list(&self) {
+  pub fn list(self) {
     let stdout = io::stdout();
 
     let mut writer = BufWriter::new(stdout);
@@ -101,7 +101,7 @@ impl LsTodo {
     }
   }
 
-  pub fn add(&self, args: &[String]) {
+  pub fn add(self, args: &[String]) {
     let file = OpenOptions::new()
       .create(true)
       .append(true)
@@ -121,7 +121,7 @@ impl LsTodo {
     }
   }
 
-  pub fn remove(&self, args: &[String]) {
+  pub fn remove(self, args: &[String]) {
     let file = OpenOptions::new()
       .write(true)
       .truncate(true)
@@ -141,7 +141,7 @@ impl LsTodo {
     }
   }
 
-  pub fn done(&self, args: &[String]) {
+  pub fn done(self, args: &[String]) {
     let file = OpenOptions::new().write(true).open(&self.lstodo_path).expect(&OPEN_ERR);
 
     let mut buffer = BufWriter::new(file);
@@ -165,14 +165,14 @@ impl LsTodo {
     }
   }
 
-  pub fn reset(&self) {
+  pub fn reset(self) {
     match fs::remove_file(&self.lstodo_path) {
       Ok(_) => {}
       Err(e) => eprintln!("Error while clearing file: {e}"),
     };
   }
 
-  pub fn undo(&self, args: &[String]) {
+  pub fn undo(self, args: &[String]) {
     let file = OpenOptions::new()
       .write(true)
       .truncate(true)
@@ -196,7 +196,7 @@ impl LsTodo {
     }
   }
 
-  pub fn sort(&self) {
+  pub fn sort(self) {
     let new_todo: String;
 
     let mut todo = String::new();
@@ -235,7 +235,7 @@ impl LsTodo {
     file.write_all(new_todo.as_bytes()).expect(&SAVE_ERR)
   }
 
-  pub fn note(&self, args: &[String]) {
+  pub fn note(self, args: &[String]) {
     if args[0] == "h" {
       note_help()
     }
@@ -266,7 +266,7 @@ impl LsTodo {
     }
   }
 
-  pub fn change(&self, args: &[String]) {
+  pub fn change(self, args: &[String]) {
     let file = OpenOptions::new()
       .write(true)
       .truncate(true)
@@ -288,7 +288,7 @@ impl LsTodo {
     }
   }
 
-  pub fn mover(&self, args: &[String]) {
+  pub fn mover(self, args: &[String]) {
     let file = OpenOptions::new().write(true).open(&self.lstodo_path).expect(&OPEN_ERR);
     let index: Vec<usize> = args.iter().map(|arg| arg.parse::<usize>().unwrap()).collect();
 
@@ -308,33 +308,22 @@ impl LsTodo {
     }
   }
 
-  // TODO: s
-  pub fn args_check<'l>(&self, args: &[String], cnt: usize, check: impl Fn(usize) -> bool) -> Self {
-    if check(args.len()) {
-      eprintln!("This command needs at least {cnt} arguments!");
+  pub fn check_args<'l>(self, args: &[String], cnt: usize, check: impl Fn(usize) -> bool) -> Self {
+    if !check(args.len()) {
+      eprintln!("This command require {cnt} arguments!");
       process::exit(1)
     }
 
-    Self {
-      lstodo: self.lstodo.clone(),
-      lstodo_path: self.lstodo_path.clone(),
-      lstodo_count: self.lstodo_count,
-      lstodo_indent: self.lstodo_indent,
-    }
+    self
   }
 
-  pub fn todo_check(&self, args: &[String]) -> Self {
+  pub fn check_todo(self, args: &[String]) -> Self {
     if args.iter().any(|i| i.parse::<usize>().unwrap() > self.lstodo_count) {
       eprintln!("There are only {} todos!", &self.lstodo_count.yellow());
       process::exit(1)
     }
 
-    Self {
-      lstodo: self.lstodo.clone(),
-      lstodo_path: self.lstodo_path.clone(),
-      lstodo_count: self.lstodo_count,
-      lstodo_indent: self.lstodo_indent,
-    }
+    self
   }
 }
 
@@ -363,21 +352,23 @@ fn main() {
   let args: Vec<String> = env::args().collect();
 
   macro_rules! check {
-    () => {};
+    ($args:expr, $count:expr, $pred:expr, $method:ident) => {
+      lstodo.check_args($args, $count, $pred).check_todo($args).$method($args)
+    };
   }
 
-  if args.len() > 1 {
-    let command = &args[1];
+  if let Some(cmd) = args.get(1).map(|s| s.as_str()) {
+    let rest = &args[2..];
 
-    match &command[..] {
+    match cmd {
       "reset" => lstodo.reset(),
-      "add" | "a" => lstodo.add(&args[2..]),
-      // "note" | "n" => lstodo.args(&args[2..], 2).note(&args[2..]),
-      // "done" | "d" => lstodo.args(&args[2..], 1).done(&args[2..]),
-      // "undo" | "u" => lstodo.args(&args[2..], 1).undo(&args[2..]),
-      // "move" | "m" => lstodo.args(&args[2..], 2).mover(&args[2..]),
-      // "remove" | "r" => lstodo.args(&args[2..], 1).remove(&args[2..]),
-      // "change" | "c" => lstodo.args(&args[2..], 2).change(&args[2..]),
+      "add" | "a" => lstodo.check_todo(rest).add(rest),
+      "note" | "n" => check!(rest, 2, |l| l == 2, note),
+      "done" | "d" => check!(rest, 2, |l| l > 0, done),
+      "undo" | "u" => check!(rest, 2, |l| l > 0, undo),
+      "move" | "m" => check!(rest, 2, |l| l == 2, mover),
+      "remove" | "r" => check!(rest, 2, |l| l > 0, remove),
+      "change" | "c" => check!(rest, 2, |l| l == 2, change),
       "list" | "l" => lstodo.list(),
       "sort" | "s" => lstodo.sort(),
       "help" | "h" | "-h" | _ => help(),
