@@ -308,13 +308,22 @@ impl LsTodo {
     }
   }
 
-  // TODO: probably need a rewrite to be more concise
-  pub fn args<'l>(&self, args: &'l [String], cnt: usize) -> Self {
-    if args.len() != cnt {
-      eprintln!("This command needs {cnt} arguments!");
+  // TODO: s
+  pub fn args_check<'l>(&self, args: &[String], cnt: usize, check: impl Fn(usize) -> bool) -> Self {
+    if check(args.len()) {
+      eprintln!("This command needs at least {cnt} arguments!");
       process::exit(1)
     }
 
+    Self {
+      lstodo: self.lstodo.clone(),
+      lstodo_path: self.lstodo_path.clone(),
+      lstodo_count: self.lstodo_count,
+      lstodo_indent: self.lstodo_indent,
+    }
+  }
+
+  pub fn todo_check(&self, args: &[String]) -> Self {
     if args.iter().any(|i| i.parse::<usize>().unwrap() > self.lstodo_count) {
       eprintln!("There are only {} todos!", &self.lstodo_count.yellow());
       process::exit(1)
@@ -353,18 +362,22 @@ fn main() {
   let lstodo = LsTodo::new().expect(&INST_ERR);
   let args: Vec<String> = env::args().collect();
 
+  macro_rules! check {
+    () => {};
+  }
+
   if args.len() > 1 {
     let command = &args[1];
 
     match &command[..] {
       "reset" => lstodo.reset(),
-      "add" | "a" => lstodo.args(&args[2..], 1).add(&args[2..]),
-      "note" | "n" => lstodo.args(&args[2..], 2).note(&args[2..]),
-      "done" | "d" => lstodo.args(&args[2..], 1).done(&args[2..]),
-      "undo" | "u" => lstodo.args(&args[2..], 1).undo(&args[2..]),
-      "move" | "m" => lstodo.args(&args[2..], 2).mover(&args[2..]),
-      "remove" | "r" => lstodo.args(&args[2..], 1).remove(&args[2..]),
-      "change" | "c" => lstodo.args(&args[2..], 2).change(&args[2..]),
+      "add" | "a" => lstodo.add(&args[2..]),
+      // "note" | "n" => lstodo.args(&args[2..], 2).note(&args[2..]),
+      // "done" | "d" => lstodo.args(&args[2..], 1).done(&args[2..]),
+      // "undo" | "u" => lstodo.args(&args[2..], 1).undo(&args[2..]),
+      // "move" | "m" => lstodo.args(&args[2..], 2).mover(&args[2..]),
+      // "remove" | "r" => lstodo.args(&args[2..], 1).remove(&args[2..]),
+      // "change" | "c" => lstodo.args(&args[2..], 2).change(&args[2..]),
       "list" | "l" => lstodo.list(),
       "sort" | "s" => lstodo.sort(),
       "help" | "h" | "-h" | _ => help(),

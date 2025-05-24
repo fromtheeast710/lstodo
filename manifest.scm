@@ -2,14 +2,12 @@
 
 (use-modules
     (guix profiles)
+    (gnu packages crates-io)
     ((gnu packages rust-apps)
-        ; #:select (rust-cargo)
-        #:select (rust-analyzer))
-    ((gnu packages crates-io)
-        #:select (rust-clippy-0.0)))
+        #:select (rust-analyzer)))
 
 (concatenate-manifests
     (list (packages->manifest (list
-        ; rust-cargo
         rust-analyzer
+        rust-cargo-0.53
         rust-clippy-0.0))))
