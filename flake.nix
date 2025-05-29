@@ -45,7 +45,10 @@
             overlays = [(import inputs.rust-overlay)];
           };
 
-          packages.default = callPackage builder {};
+          packages = rec {
+            default = lstodo;
+            lstodo = callPackage builder {};
+          };
 
           devShells.default = mkShell {
             packages = [
