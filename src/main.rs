@@ -1,9 +1,8 @@
 use colorz::*;
 use std::{
-  env, fs,
-  fs::OpenOptions,
-  io,
-  io::{BufReader, BufWriter, Read, Write},
+  env,
+  fs::{self, OpenOptions},
+  io::{self, BufReader, BufWriter, Read, Write},
   process,
 };
 
@@ -189,9 +188,8 @@ impl LsTodo {
           buffer.write_all(l.as_bytes()).expect(&WRITE_ERR)
         }
       } else {
-        let l = format!("{l}\n");
-
-        buffer.write_all(l.as_bytes()).expect(&WRITE_ERR)
+        eprintln!("This todo is already undone!");
+        process::exit(1)
       }
     }
   }
@@ -318,7 +316,7 @@ impl LsTodo {
   }
 
   pub fn check_todo(self, args: &[String]) -> Self {
-    if args.iter().any(|i| i.parse::<usize>().unwrap() > self.lstodo_count) {
+    if args.iter().filter_map(|l| l.parse().ok()).any(|i: usize| i > self.lstodo_count) {
       eprintln!("There are only {} todos!", &self.lstodo_count.yellow());
       process::exit(1)
     }
@@ -364,10 +362,10 @@ fn main() {
       "reset" => lstodo.reset(),
       "add" | "a" => lstodo.check_todo(rest).add(rest),
       "note" | "n" => check!(rest, 2, |l| l == 2, note),
-      "done" | "d" => check!(rest, 2, |l| l > 0, done),
-      "undo" | "u" => check!(rest, 2, |l| l > 0, undo),
+      "done" | "d" => check!(rest, 1, |l| l > 0, done),
+      "undo" | "u" => check!(rest, 1, |l| l > 0, undo),
       "move" | "m" => check!(rest, 2, |l| l == 2, mover),
-      "remove" | "r" => check!(rest, 2, |l| l > 0, remove),
+      "remove" | "r" => check!(rest, 1, |l| l > 0, remove),
       "change" | "c" => check!(rest, 2, |l| l == 2, change),
       "list" | "l" => lstodo.list(),
       "sort" | "s" => lstodo.sort(),
